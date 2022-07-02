@@ -22,11 +22,12 @@ on:
 
 env:
   SOURCE_URL: https://github.com/immortalwrt/immortalwrt
-  SOURCE_BRANCH: openwrt-18.06-k5.4
+  SOURCE_BRANCH: openwrt-21.02
   CURRENT_BRANCH: main
   WEB_ROOT_PATH: /data/www/openwrt.cc
   TOOLCHAIN_TAG: toolchain
   TZ: Asia/Shanghai
+  FIRMWARE_RELEASE_UPLOAD: true
 
 jobs:
   Config:
@@ -495,6 +496,15 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh -q -t -i ~/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $HOST bash -c "'mkdir -p $DEST_FAILLOGS'"
           rsync -chavP --delete -e 'ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no' $SOURCE_FAILLOGS/ $HOST:$DEST_FAILLOGS/
+
+      - name: Deploy Files To Release
+        uses: ncipollo/release-action@v1.8.0
+        if: env.FIRMWARE_RELEASE_UPLOAD == 'true'
+        with:
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.COMMIT }}
+          artifacts: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}
 
       - name: Print Disk Usage Information
         if: always()
