@@ -167,6 +167,7 @@ jobs:
           make package/index V=s
 
       - name: Print Signatures
+        continue-on-error: true
         run: |
           cd $OPENWRT_ROOT_PATH/bin/packages/$DEVICE_PLATFORM
           echo "Signature of base packages:"
